@@ -1,5 +1,5 @@
 <template>
-  <b-form method="post" class="form" @submit.prevent="emit('upload-file')">
+  <b-form method="post" class="form" @submit.prevent="$emit('upload-file')">
     <b-field :label="label">
       <b-field
         class="file is-primary"
@@ -10,7 +10,7 @@
         <b-upload :value="file" class="file-label" rounded>
           <span class="file-cta">
             <b-icon class="file-icon" icon="upload"></b-icon>
-            <span class="file-label">{{ uploadStatus }}</span>
+            <span class="file-label">Click To Upload</span>
           </span>
           <span v-if="file" class="file-name">
             {{ file.name }}
@@ -18,6 +18,7 @@
         </b-upload>
       </b-field>
     </b-field>
+    <b-button type="submit is-success" :disabled="submitting">{{uploadStatus}}</b-button>
   </b-form>
 </template>
 
@@ -35,7 +36,7 @@ export default {
     },
     label: {
       type: String,
-      default: 'Upload File',
+      default: 'Submit',
     },
     uploadStatus: {
       type: String,

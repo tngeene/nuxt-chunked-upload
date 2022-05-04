@@ -21,7 +21,7 @@ export default {
         file: null,
       },
       submitting: false,
-      uploadStatus: 'Click to upload'
+      uploadStatus: 'Submit File'
     }
   },
   methods: {

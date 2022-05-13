@@ -41,6 +41,30 @@ export default {
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
   ],
+  // toast settings, https://www.npmjs.com/package/vue-toasted
+  toast: {
+    position: 'top-right',
+    duration: 4000,
+    register: [
+      // Register custom toasts
+      {
+        name: 'my_error',
+        message: 'Oops...Something went wrong',
+        options: {
+          type: 'error'
+        }
+      }
+    ],
+    action: [
+      {
+        text: 'Close',
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        onClick: (e, toastObject) => {
+          toastObject.goAway(0)
+        }
+      }
+    ]
+  },
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
   axios: {

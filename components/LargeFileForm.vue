@@ -1,8 +1,19 @@
 <template>
-  <b-form method="post" class="form" @submit.prevent="uploadMediaFile">
+  <form method="post" class="form" @submit.prevent="uploadMediaFile">
     <div class="file has-name is-right mb-2">
-      <label class="file-label">
-        <input class="file-input" type="file" name="file to upload" @change="createFileHash"/>
+      <b-field label="Included filename">
+      <b-field class="file is-primary" :class="{'has-name': !!media.file}">
+        <b-upload v-model="media.file" class="file-label" rounded>
+          <span class="file-cta">
+            <b-icon class="file-icon" icon="upload"></b-icon>
+            <span class="file-label">{{ media.file.name || "Click to upload"}}</span>
+          </span>
+        </b-upload>
+      </b-field>
+    </b-field>
+
+      <!-- <label class="file-label">
+        <input class="file-input" type="file" v-model="media.file" name="file to upload" />
         <span class="file-cta">
           <span class="file-icon">
             <b-icon class="file-icon" icon="upload"></b-icon>
@@ -10,12 +21,12 @@
           <span class="file-label"> Choose a file… </span>
         </span>
         <span v-if="media.file" class="file-name"> {{ media.file.name }} </span>
-      </label>
+      </label> -->
     </div>
-    <b-button type="submit is-success" :disabled="submitting">
+    <b-button :disabled="submitting" type="is-success" @click="uploadMediaFile">
       {{ uploadStatus }}</b-button
     >
-  </b-form>
+  </form>
 </template>
 
 <script>
@@ -33,12 +44,28 @@ export default {
       fileChunkSize: 32768,
       submitting: false,
       media: {
-        file: null,
+        file: {},
       },
       uploadStatus: 'Upload File',
     }
   },
   methods: {
+    snackbar() {
+      this.$buefy.snackbar.open({
+        message: 'File Could not be uploaded',
+        position: 'is-top-right',
+        type: 'is-warning',
+        duration: 1500,
+        actionText: 'Retry',
+
+        onAction: () => {
+          this.$buefy.toast.open({
+            message: 'Resubmitting File',
+            queue: false,
+          })
+        },
+      })
+    },
     createFileHash(event) {
       // eslint-disable-next-line no-console
       console.log('creating hash')
@@ -73,9 +100,12 @@ export default {
       }
       loadNext()
     },
+
     async uploadMediaFile() {
       this.submitting = true
       this.uploadStatus = 'Submitting File'
+      // eslint-disable-next-line no-console
+      this.snackbar()
       const fileSizeInBytes = this.media.file.size
 
       const size = 2048000 * 16
@@ -111,7 +141,7 @@ export default {
             }/${fileSizeInBytes}`,
           },
         }
-        await axios
+        await this.$axios
           .put(fileChunkUploadUrl, formData, config)
           .then((response) => {
             fileChunkUploadUrl = response.data.url

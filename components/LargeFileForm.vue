@@ -2,29 +2,24 @@
   <form method="post" class="form" @submit.prevent="uploadMediaFile">
     <div class="file has-name is-right mb-2">
       <b-field label="Included filename">
-      <b-field class="file is-primary" :class="{'has-name': !!media.file}">
-        <b-upload v-model="media.file" class="file-label" rounded>
-          <span class="file-cta">
-            <b-icon class="file-icon" icon="upload"></b-icon>
-            <span class="file-label">{{ media.file.name || "Click to upload"}}</span>
-          </span>
-        </b-upload>
+        <b-field class="file is-primary" :class="{ 'has-name': !!media.file }">
+          <b-upload v-model="media.file" class="file-label" rounded>
+            <span class="file-cta">
+              <b-icon class="file-icon" icon="upload"></b-icon>
+              <span class="file-label">{{
+                media.file.name || 'Click to upload'
+              }}</span>
+            </span>
+          </b-upload>
+        </b-field>
       </b-field>
-    </b-field>
-
-      <!-- <label class="file-label">
-        <input class="file-input" type="file" v-model="media.file" name="file to upload" />
-        <span class="file-cta">
-          <span class="file-icon">
-            <b-icon class="file-icon" icon="upload"></b-icon>
-          </span>
-          <span class="file-label"> Choose a file… </span>
-        </span>
-        <span v-if="media.file" class="file-name"> {{ media.file.name }} </span>
-      </label> -->
     </div>
-    <b-button :disabled="submitting" type="is-success" @click="uploadMediaFile">
-      {{ uploadStatus }}</b-button
+    <b-button
+      :disabled="submitting"
+      type="is-success"
+      @click="uploadMediaFile"
+    >
+      {{ uploadStatus }}  {{media.file.length}}</b-button
     >
   </form>
 </template>
@@ -50,12 +45,12 @@ export default {
     }
   },
   methods: {
-    snackbar() {
+    snackbar(messageStr) {
       this.$buefy.snackbar.open({
-        message: 'File Could not be uploaded',
+        message: messageStr,
         position: 'is-top-right',
         type: 'is-warning',
-        duration: 1500,
+        duration: 6000,
         actionText: 'Retry',
 
         onAction: () => {
@@ -102,11 +97,11 @@ export default {
     },
 
     async uploadMediaFile() {
+      const fileSizeInBytes = this.media.file.size
+      if (fileSizeInBytes > 0) {
       this.submitting = true
       this.uploadStatus = 'Submitting File'
-      // eslint-disable-next-line no-console
-      this.snackbar()
-      const fileSizeInBytes = this.media.file.size
+      }
 
       const size = 2048000 * 16
       // calculate the number of chunks to subdivide the file into
@@ -144,37 +139,51 @@ export default {
         await this.$axios
           .put(fileChunkUploadUrl, formData, config)
           .then((response) => {
-            fileChunkUploadUrl = response.data.url
-
-            if (isLastChunk) {
-              const finalChunkData = {
-                md5: this.fileHash,
-                object_id: this.offlineFileId,
-              }
-              axios
-                .post(fileChunkUploadUrl, finalChunkData)
-                .then((response) => {
-                  this.$toast.show('Uploading File')
-                  if (response.status === 200) {
+            // eslint-disable-next-line no-console
+              console.log(`${response.stautus} status fr`)
+            if (response.status === 200) {
+              fileChunkUploadUrl = response.data.url
+              if (isLastChunk) {
+                const finalChunkData = {
+                  md5: this.fileHash,
+                  object_id: this.offlineFileId,
+                }
+                axios
+                  .post(fileChunkUploadUrl, finalChunkData)
+                  .then((response) => {
+                    this.$toast.show('Uploading File')
+                    if (response.status === 200) {
+                      this.submitting = false
+                      this.uploadStatus = 'Submit File'
+                      this.$toast.success('File Upload Successful')
+                      this.$router.push({ name: 'offline-files-list' })
+                    } else {
+                      this.$toast.error('Could not upload file.')
+                    }
+                  })
+                  .catch(() => {
                     this.submitting = false
                     this.uploadStatus = 'Submit File'
-                    this.$toast.success('File Upload Successful')
-                    this.$router.push({ name: 'offline-files-list' })
-                  } else {
-                    this.$toast.error('Could not upload file.')
-                  }
-                })
-                .catch((error) => {
-                  this.submitting = false
-                  this.uploadStatus = 'Submit File'
-                  // eslint-disable-next-line no-console
-                  console.log(error.response, 'final chunk error')
-                })
+                    // eslint-disable-next-line no-console
+                    this.snackbar('Could not Upload Final Chunk')
+                  })
+              }
+            } else {
+              // eslint-disable-next-line no-console
+              console.log(`${response.stautus} status`)
+              this.submitting = false
+              this.uploadStatus = 'Submit File'
+              const errorMessage = 'Could not Upload File'
+              this.snackbar(errorMessage)
             }
           })
           .catch((error) => {
             // eslint-disable-next-line no-console
             console.log(error.response)
+            this.submitting = false
+            this.uploadStatus = 'Submit File'
+            const errorMessage = 'Could not Upload File'
+            this.snackbar(errorMessage)
           })
       }
     },

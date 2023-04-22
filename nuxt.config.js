@@ -40,6 +40,8 @@ export default {
     'nuxt-buefy',
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
+    // https://auth.nuxtjs.org/
+    '@nuxtjs/auth-next',
   ],
   // toast settings, https://www.npmjs.com/package/vue-toasted
   toast: {

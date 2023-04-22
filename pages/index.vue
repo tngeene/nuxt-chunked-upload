@@ -2,6 +2,7 @@
   <section class="section">
     <div class="columns is-mobile">
       <LargeFileForm />
+      <LoginButton />
     </div>
   </section>
 </template>
@@ -12,6 +13,7 @@ export default {
   data() {
     return {
       uploadStatus: 'Submit File',
+      isLoggedIn: false,
     }
   },
 }

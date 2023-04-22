@@ -19,7 +19,7 @@
       type="is-success"
       @click="uploadMediaFile"
     >
-      {{ uploadStatus }}  {{media.file.length}}</b-button
+      {{ uploadStatus }} </b-button
     >
   </form>
 </template>
@@ -71,8 +71,11 @@ export default {
         File.prototype.slice ||
         File.prototype.mozSlice ||
         File.prototype.webkitSlice
+      
       const chunks = Math.ceil(file.size / this.fileChunkSize)
+      
       let currentChunkIndex = 0
+      
       reader.onload = (event) => {
         spark.append(event.target.result)
         currentChunkIndex++
@@ -108,6 +111,8 @@ export default {
       const chunks = Math.ceil(fileSizeInBytes / size)
       const fileChunks = []
       const selectedFile = this.media.file
+      // eslint-disable-next-line no-console
+      console.log(`${selectedFile} selected file while ${this.media} `, )
       for (let i = 0; i < chunks; i++) {
         fileChunks.push(
           selectedFile.slice(
